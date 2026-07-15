@@ -1,9 +1,11 @@
 import email
 import hashlib
 import imaplib
+from email.header import decode_header, make_header
 from email.utils import parseaddr, parsedate_to_datetime
 
 import config
+import role_parser
 
 
 def _build_search_criteria():
@@ -36,6 +38,14 @@ def _applied_date_for(msg):
 def _from_email_for(msg):
     _, addr = parseaddr(msg.get("From", ""))
     return addr
+
+
+def _subject_for(msg):
+    raw = msg.get("Subject", "")
+    try:
+        return str(make_header(decode_header(raw)))
+    except (ValueError, LookupError):
+        return raw
 
 
 def _pick_resume_attachment(msg):
@@ -99,10 +109,12 @@ def fetch_matching_applications(known_message_ids):
                 skipped_no_resume += 1
                 continue
 
+            subject = _subject_for(msg)
             results.append({
                 "message_id": message_id,
                 "from_email": _from_email_for(msg),
                 "applied_date": _applied_date_for(msg),
+                "role": role_parser.extract_role(subject),
                 "resume_filename": resume_filename,
                 "resume_bytes": resume_bytes,
             })

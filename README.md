@@ -3,11 +3,17 @@
 Runs once a day via GitHub Actions. Scans your Gmail inbox for application
 emails (subject containing "apply for" or "application for", with a resume
 attached) received since 2026-01-01, and for each new one appends a row to a
-Google Sheet with the applicant's email, applied date, phone number
-(extracted from their resume), and a link to the resume file (uploaded to a
-Google Drive Shared Drive). Already-recorded emails are never reprocessed or
-re-added. Emails matching the subject phrase but with no resume attached are
-skipped, since real applications in this inbox always have one attached.
+Google Sheet with the applicant's email, applied date, role (parsed out of
+the subject line), phone number (extracted from their resume), and a link to
+the resume file (uploaded to a Google Drive Shared Drive). Already-recorded
+emails are never reprocessed or re-added. Emails matching the subject phrase
+but with no resume attached are skipped, since real applications in this
+inbox always have one attached.
+
+The main sheet (first tab) only ever shows those 5 human-readable columns.
+A second tab, **MessageIDs**, is created automatically and holds the actual
+dedup key (Gmail's Message-ID per email) — you never need to open or edit
+it, it just needs to keep existing so re-runs don't create duplicate rows.
 
 ## One-time setup
 
@@ -58,6 +64,20 @@ Push this folder to a GitHub repository (can be private). Then:
 - Go to the **Actions** tab → "Daily candidate sync" → **Run workflow** to trigger it manually the first time.
 - Check the run's log to confirm it found and processed emails correctly.
 - After that, it runs automatically every day at 03:17 UTC (edit the cron line in `.github/workflows/daily-sync.yml` to change the time).
+
+## Resetting after a schema change (e.g. adding the Role column)
+
+If you already had data saved under the old column layout, clear it out
+before running again so old-format rows don't mix with new ones:
+
+1. Open the main sheet tab → select all cells (Ctrl/Cmd+A) → Delete. The
+   script will insert the correct new header automatically on the next run.
+2. If a "MessageIDs" tab already exists from before, delete that whole tab
+   (right-click its name at the bottom → Delete) — it'll be recreated fresh.
+3. In the Drive Shared Drive, select all the previously uploaded resume
+   files and delete them, so there are no orphaned files left over.
+4. Run the workflow again — it reprocesses everything from 2026-01-01
+   with the new columns.
 
 ## Running locally (optional, for testing)
 

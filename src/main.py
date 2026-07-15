@@ -42,9 +42,9 @@ def process_application(credentials, application):
     return [
         application["from_email"],
         application["applied_date"],
+        application["role"],
         phone,
         resume_link,
-        application["message_id"],
     ]
 
 
@@ -54,13 +54,15 @@ BATCH_SIZE = 10
 def main():
     credentials = build_credentials()
 
-    worksheet, known_message_ids = sheets_client.get_known_message_ids(credentials)
+    main_worksheet, dedup_worksheet = sheets_client.open_worksheets(credentials)
+    known_message_ids = sheets_client.get_known_message_ids(dedup_worksheet)
     print(f"Loaded {len(known_message_ids)} previously recorded application(s).", flush=True)
 
     applications = gmail_client.fetch_matching_applications(known_message_ids)
     print(f"Found {len(applications)} new matching email(s).", flush=True)
 
     pending_rows = []
+    pending_message_ids = []
     seen_this_run = set()
     total_appended = 0
 
@@ -85,16 +87,24 @@ def main():
             signal.alarm(0)
 
         pending_rows.append(row)
-        print(f"  [{i}/{len(applications)}] + {row[0]} | applied {row[1]} | phone {row[2]}", flush=True)
+        pending_message_ids.append([message_id])
+        print(f"  [{i}/{len(applications)}] + {row[0]} | applied {row[1]} | role {row[2]} | phone {row[3]}", flush=True)
 
         if len(pending_rows) >= BATCH_SIZE:
-            sheets_client.append_rows(worksheet, pending_rows)
+            # Write the visible rows before the dedup keys: if something
+            # fails between the two calls, worst case is a possible
+            # duplicate row next run (visible, easy to spot and delete),
+            # never a candidate silently missing from the sheet entirely.
+            sheets_client.append_rows(main_worksheet, pending_rows)
+            sheets_client.append_rows(dedup_worksheet, pending_message_ids)
             total_appended += len(pending_rows)
             print(f"  -- saved batch of {len(pending_rows)} to the sheet ({total_appended} so far)", flush=True)
             pending_rows = []
+            pending_message_ids = []
 
     if pending_rows:
-        sheets_client.append_rows(worksheet, pending_rows)
+        sheets_client.append_rows(main_worksheet, pending_rows)
+        sheets_client.append_rows(dedup_worksheet, pending_message_ids)
         total_appended += len(pending_rows)
 
     print(f"Done. Appended {total_appended} new row(s) to the sheet.", flush=True)

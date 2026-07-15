@@ -21,8 +21,12 @@ SINCE_DATE = "01-Jan-2026"
 # IMAP SUBJECT search is already case-insensitive substring matching.
 SUBJECT_KEYWORDS = ["apply for", "application for"]
 
-SHEET_HEADER = ["Applicant Email", "Applied Date", "Phone", "Resume Link", "Message-ID"]
-MESSAGE_ID_COLUMN = len(SHEET_HEADER)  # 1-indexed, last column
+SHEET_HEADER = ["Applicant Email", "Applied Date", "Role", "Phone", "Resume Link"]
+
+# Message-IDs (the dedup key) live on a separate, second tab in the same
+# spreadsheet rather than as a visible column on the main sheet.
+DEDUP_SHEET_TITLE = "MessageIDs"
+DEDUP_SHEET_HEADER = ["Message-ID"]
 
 RESUME_EXTENSIONS = (".pdf", ".docx")
 
