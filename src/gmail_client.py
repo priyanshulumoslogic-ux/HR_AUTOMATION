@@ -86,9 +86,15 @@ def fetch_matching_applications(known_message_ids):
         if typ != "OK":
             raise RuntimeError(f"IMAP search failed: {typ} {data}")
 
+        message_nums = data[0].split()
+        print(f"IMAP search matched {len(message_nums)} email(s), fetching each one...", flush=True)
+
         results = []
         skipped_no_resume = 0
-        for num in data[0].split():
+        for fetch_i, num in enumerate(message_nums, start=1):
+            if fetch_i == 1 or fetch_i % 25 == 0 or fetch_i == len(message_nums):
+                print(f"  fetching {fetch_i}/{len(message_nums)}...", flush=True)
+
             typ, msg_data = imap.fetch(num, "(RFC822)")
             if typ != "OK" or not msg_data or not msg_data[0]:
                 continue
