@@ -36,29 +36,43 @@ def process_application(credentials, application):
     ]
 
 
+BATCH_SIZE = 10
+
+
 def main():
     credentials = build_credentials()
 
     worksheet, known_message_ids = sheets_client.get_known_message_ids(credentials)
-    print(f"Loaded {len(known_message_ids)} previously recorded application(s).")
+    print(f"Loaded {len(known_message_ids)} previously recorded application(s).", flush=True)
 
     applications = gmail_client.fetch_matching_applications(known_message_ids)
-    print(f"Found {len(applications)} new matching email(s).")
+    print(f"Found {len(applications)} new matching email(s).", flush=True)
 
-    rows = []
+    pending_rows = []
     seen_this_run = set()
-    for application in applications:
+    total_appended = 0
+
+    for i, application in enumerate(applications, start=1):
         message_id = application["message_id"]
         if message_id in seen_this_run:
             continue
         seen_this_run.add(message_id)
 
         row = process_application(credentials, application)
-        rows.append(row)
-        print(f"  + {row[0]} | applied {row[1]} | phone {row[2]}")
+        pending_rows.append(row)
+        print(f"  [{i}/{len(applications)}] + {row[0]} | applied {row[1]} | phone {row[2]}", flush=True)
 
-    sheets_client.append_rows(worksheet, rows)
-    print(f"Done. Appended {len(rows)} new row(s) to the sheet.")
+        if len(pending_rows) >= BATCH_SIZE:
+            sheets_client.append_rows(worksheet, pending_rows)
+            total_appended += len(pending_rows)
+            print(f"  -- saved batch of {len(pending_rows)} to the sheet ({total_appended} so far)", flush=True)
+            pending_rows = []
+
+    if pending_rows:
+        sheets_client.append_rows(worksheet, pending_rows)
+        total_appended += len(pending_rows)
+
+    print(f"Done. Appended {total_appended} new row(s) to the sheet.", flush=True)
 
 
 if __name__ == "__main__":

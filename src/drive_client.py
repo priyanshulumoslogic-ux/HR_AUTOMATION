@@ -22,16 +22,22 @@ def upload_and_share(credentials, folder_id, filename, data_bytes):
     and returns the webViewLink to store in the sheet."""
     drive = build("drive", "v3", credentials=credentials)
 
+    # folder_id is expected to be a Shared Drive (or a folder inside one).
+    # Files created there are owned by the Shared Drive itself, not by this
+    # service account, which has no storage quota of its own for regular
+    # "My Drive" uploads (Google returns storageQuotaExceeded otherwise).
     media = MediaIoBaseUpload(io.BytesIO(data_bytes), mimetype=_mimetype_for(filename), resumable=False)
     file = drive.files().create(
         body={"name": filename, "parents": [folder_id]},
         media_body=media,
         fields="id,webViewLink",
+        supportsAllDrives=True,
     ).execute()
 
     drive.permissions().create(
         fileId=file["id"],
         body={"type": "anyone", "role": "reader"},
+        supportsAllDrives=True,
     ).execute()
 
     return file["webViewLink"]

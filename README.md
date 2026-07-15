@@ -1,11 +1,13 @@
 # Indeed application tracker (Gmail → Google Sheet)
 
 Runs once a day via GitHub Actions. Scans your Gmail inbox for application
-emails (subject containing "apply", "application", or "applicant") received
-since 2026-01-01, and for each new one appends a row to a Google Sheet with
-the applicant's email, applied date, phone number (extracted from their
-resume), and a link to the resume file (uploaded to a Google Drive folder).
-Already-recorded emails are never reprocessed or re-added.
+emails (subject containing "apply for" or "application for", with a resume
+attached) received since 2026-01-01, and for each new one appends a row to a
+Google Sheet with the applicant's email, applied date, phone number
+(extracted from their resume), and a link to the resume file (uploaded to a
+Google Drive Shared Drive). Already-recorded emails are never reprocessed or
+re-added. Emails matching the subject phrase but with no resume attached are
+skipped, since real applications in this inbox always have one attached.
 
 ## One-time setup
 
@@ -27,13 +29,15 @@ Gmail → Settings → See all settings → Forwarding and POP/IMAP → Enable I
 4. Open the new service account → Keys → Add Key → Create new key → JSON. This downloads a `.json` file — keep it private, never commit it.
 5. Open the JSON file and note the `client_email` field (looks like `xxxx@xxxx.iam.gserviceaccount.com`).
 
-### 4. Create the Google Sheet and Drive folder
+### 4. Create the Google Sheet and a Drive Shared Drive
 
 1. Create a new Google Sheet (any name). Share it with the service account's `client_email` as **Editor**.
    - The sheet ID is the long string in its URL: `https://docs.google.com/spreadsheets/d/<THIS_PART>/edit`.
-2. Create a Google Drive folder (e.g. "Indeed Resumes"). Share it with the same `client_email` as **Editor**.
-   - The folder ID is the long string in its URL: `https://drive.google.com/drive/folders/<THIS_PART>`.
-3. Note: resumes uploaded to this folder are given a "anyone with the link can view" permission so the link always works from the sheet. Keep that in mind since resumes contain personal data.
+2. In Google Drive, use **Shared drives** (left sidebar), not a regular "My Drive" folder — service accounts have no storage quota of their own, so uploading into a normal folder fails with `storageQuotaExceeded` even if it's shared with them. Files inside a Shared Drive are owned by the drive itself, which sidesteps that.
+   - **Shared drives → New** → name it e.g. "Indeed Resumes".
+   - Open it → **Manage members** → add the service account's `client_email` → role **Content Manager** (or higher).
+   - The Shared Drive's ID is the long string in its URL when you open it: `https://drive.google.com/drive/folders/<THIS_PART>`.
+3. Note: resumes uploaded there are given a "anyone with the link can view" permission so the link always works from the sheet. Keep that in mind since resumes contain personal data.
 
 ### 5. Add GitHub Actions secrets
 
@@ -45,7 +49,7 @@ In this repository: Settings → Secrets and variables → Actions → New repos
 | `GMAIL_APP_PASSWORD` | the 16-character app password from step 2 |
 | `GCP_SERVICE_ACCOUNT_JSON` | paste the **entire contents** of the downloaded JSON key file |
 | `SPREADSHEET_ID` | the sheet ID from step 4 |
-| `DRIVE_FOLDER_ID` | the folder ID from step 4 |
+| `DRIVE_FOLDER_ID` | the Shared Drive ID from step 4 |
 
 ### 6. Push this repo to GitHub and run it
 

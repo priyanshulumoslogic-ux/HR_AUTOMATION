@@ -77,6 +77,7 @@ def fetch_matching_applications(known_message_ids):
             raise RuntimeError(f"IMAP search failed: {typ} {data}")
 
         results = []
+        skipped_no_resume = 0
         for num in data[0].split():
             typ, msg_data = imap.fetch(num, "(RFC822)")
             if typ != "OK" or not msg_data or not msg_data[0]:
@@ -91,6 +92,13 @@ def fetch_matching_applications(known_message_ids):
 
             resume_filename, resume_bytes = _pick_resume_attachment(msg)
 
+            # Real applications in this inbox always have a resume attached.
+            # No attachment is a strong signal this is a job-alert digest or
+            # newsletter that merely mentioned the subject phrase in passing.
+            if not resume_filename:
+                skipped_no_resume += 1
+                continue
+
             results.append({
                 "message_id": message_id,
                 "from_email": _from_email_for(msg),
@@ -98,6 +106,9 @@ def fetch_matching_applications(known_message_ids):
                 "resume_filename": resume_filename,
                 "resume_bytes": resume_bytes,
             })
+
+        if skipped_no_resume:
+            print(f"Skipped {skipped_no_resume} subject-matching email(s) with no resume attachment.", flush=True)
 
         return results
     finally:
