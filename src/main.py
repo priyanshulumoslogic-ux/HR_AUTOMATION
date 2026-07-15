@@ -1,3 +1,5 @@
+import signal
+
 from google.oauth2.service_account import Credentials
 
 import config
@@ -5,6 +7,16 @@ import drive_client
 import gmail_client
 import resume_parser
 import sheets_client
+
+PROCESS_TIMEOUT_SECONDS = 90
+
+
+class ProcessingTimeout(Exception):
+    pass
+
+
+def _timeout_handler(signum, frame):
+    raise ProcessingTimeout()
 
 
 def build_credentials():
@@ -58,7 +70,20 @@ def main():
             continue
         seen_this_run.add(message_id)
 
-        row = process_application(credentials, application)
+        signal.signal(signal.SIGALRM, _timeout_handler)
+        signal.alarm(PROCESS_TIMEOUT_SECONDS)
+        try:
+            row = process_application(credentials, application)
+        except ProcessingTimeout:
+            print(
+                f"  [{i}/{len(applications)}] ! TIMED OUT after {PROCESS_TIMEOUT_SECONDS}s on "
+                f"{application['from_email']} - skipping, will retry next run",
+                flush=True,
+            )
+            continue
+        finally:
+            signal.alarm(0)
+
         pending_rows.append(row)
         print(f"  [{i}/{len(applications)}] + {row[0]} | applied {row[1]} | phone {row[2]}", flush=True)
 
