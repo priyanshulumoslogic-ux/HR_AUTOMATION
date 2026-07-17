@@ -14,12 +14,21 @@ MAILBOX = "INBOX"
 # so re-scanning the full range each run is cheap and avoids boundary misses.
 SINCE_DATE = "01-Jan-2026"
 
-# Real application emails in this inbox are candidates emailing directly with
-# a resume attached, always phrased as "apply for ..." or "application for ...".
-# Bare "apply"/"application" alone matched far too much unrelated mail
-# (job-alert digests, newsletters), so we require the "for" phrase.
+# Subject phrases that qualify an email for consideration. The resume-
+# attachment requirement (see gmail_client.py) is what actually distinguishes
+# a genuine candidate email from an outside company/newsletter that happens
+# to mention "intern"/"internship"/"job opportunity" - it applies to every
+# keyword here, not just the "apply for"/"application for" ones.
+# "intern" alone also matches "internship" as a substring, no need to list both.
 # IMAP SUBJECT search is already case-insensitive substring matching.
-SUBJECT_KEYWORDS = ["apply for", "application for"]
+SUBJECT_KEYWORDS = ["apply for", "application for", "intern", "job opportunity"]
+
+# Role extraction only knows how to strip a leading "apply for"/"application
+# for" phrase and use whatever follows as the role. Subjects matched via the
+# other keywords above (e.g. "AIML intern", "Regarding qa opportunity") don't
+# follow that pattern - the role comes before the keyword, not after - so
+# role_parser falls back to using the whole subject when none of these match.
+ROLE_PREFIX_KEYWORDS = ["apply for", "application for"]
 
 SHEET_HEADER = ["Applicant Email", "Applied Date", "Role", "Phone", "Resume Link"]
 

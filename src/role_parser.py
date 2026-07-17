@@ -19,14 +19,17 @@ def extract_role(subject):
     lowered = subject.lower()
     best_index = None
     best_phrase_len = 0
-    for phrase in config.SUBJECT_KEYWORDS:
+    for phrase in config.ROLE_PREFIX_KEYWORDS:
         index = lowered.find(phrase)
         if index != -1 and (best_index is None or index < best_index):
             best_index = index
             best_phrase_len = len(phrase)
 
     if best_index is None:
-        return ""
+        # Matched via a keyword like "intern" or "job opportunity" instead,
+        # where the role comes before the keyword, not after (e.g. "AIML
+        # intern"). No reliable phrase to strip, so use the subject as-is.
+        return subject.strip(_STRIP_CHARS)
 
     role = subject[best_index + best_phrase_len:].strip(_STRIP_CHARS)
 
