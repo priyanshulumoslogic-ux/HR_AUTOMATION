@@ -21,14 +21,17 @@ SINCE_DATE = "01-Jan-2026"
 # keyword here, not just the "apply for"/"application for" ones.
 # "intern" alone also matches "internship" as a substring, no need to list both.
 # IMAP SUBJECT search is already case-insensitive substring matching.
-SUBJECT_KEYWORDS = ["apply for", "application for", "intern", "job opportunity"]
+SUBJECT_KEYWORDS = [
+    "apply for", "application for", "applying for", "applied for",
+    "intern", "job opportunity",
+]
 
-# Role extraction only knows how to strip a leading "apply for"/"application
-# for" phrase and use whatever follows as the role. Subjects matched via the
-# other keywords above (e.g. "AIML intern", "Regarding qa opportunity") don't
-# follow that pattern - the role comes before the keyword, not after - so
-# role_parser falls back to using the whole subject when none of these match.
-ROLE_PREFIX_KEYWORDS = ["apply for", "application for"]
+# Role extraction only knows how to strip a leading phrase like "apply for"/
+# "applying for" and use whatever follows as the role. Subjects matched via
+# the other keywords above (e.g. "AIML intern", "Regarding qa opportunity")
+# don't follow that pattern - the role comes before the keyword, not after -
+# so role_parser falls back to using the whole subject when none of these match.
+ROLE_PREFIX_KEYWORDS = ["apply for", "application for", "applying for", "applied for"]
 
 SHEET_HEADER = ["Applicant Email", "Applied Date", "Role", "Phone", "Resume Link"]
 
