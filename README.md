@@ -1,6 +1,6 @@
 # Indeed application tracker (Gmail → Google Sheet)
 
-Runs once a day via GitHub Actions. Scans your Gmail inbox for application
+Runs every 6 hours via GitHub Actions. Scans your Gmail inbox for application
 emails (subject containing "apply for" or "application for", with a resume
 attached) received since 2026-01-01, and for each new one appends a row to a
 Google Sheet with the applicant's email, applied date, role (parsed out of
@@ -61,9 +61,9 @@ In this repository: Settings → Secrets and variables → Actions → New repos
 
 Push this folder to a GitHub repository (can be private). Then:
 
-- Go to the **Actions** tab → "Daily candidate sync" → **Run workflow** to trigger it manually the first time.
+- Go to the **Actions** tab → "Candidate sync (every 6h)" → **Run workflow** to trigger it manually the first time.
 - Check the run's log to confirm it found and processed emails correctly.
-- After that, it runs automatically every day at 03:17 UTC (edit the cron line in `.github/workflows/daily-sync.yml` to change the time).
+- After that, it runs automatically every 6 hours (00:17, 06:17, 12:17, 18:17 UTC = 5:47 AM, 11:47 AM, 5:47 PM, 11:47 PM IST). GitHub Actions doesn't guarantee the exact minute for scheduled runs — expect it to sometimes fire a bit late, especially during high-load periods. Edit the cron line in `.github/workflows/daily-sync.yml` to change the frequency or time.
 
 ## Resetting after a schema change (e.g. adding the Role column)
 

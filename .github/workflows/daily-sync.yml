@@ -1,8 +1,10 @@
-name: Daily candidate sync
+name: Candidate sync (every 6h)
 
+# Runs every 6 hours: 00:17, 06:17, 12:17, 18:17 UTC
+# = 5:47 AM, 11:47 AM, 5:47 PM, 11:47 PM IST
 on:
   schedule:
-    - cron: "17 3 * * *"
+    - cron: "17 */6 * * *"
   workflow_dispatch: {}
 
 jobs:
