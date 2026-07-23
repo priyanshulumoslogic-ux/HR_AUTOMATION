@@ -1,7 +1,7 @@
 # HR Assessment Mailer (Gmail → role-specific technical assessment)
 
-Runs every 6 hours via GitHub Actions, offset 30 minutes after the Indeed
-scraper. Scans the same inbox the [Indeed scraper](../Indeed) reads for
+Runs every 6 hours via GitHub Actions, offset 30 minutes after the [Indeed
+scraper](../src) in this same repo. Scans the same inbox that scraper reads for
 application emails (subject containing "apply for", "application for",
 "intern", etc., with a resume attached), classifies the role from the
 subject line, and — for the roles it knows — sends the candidate an
@@ -60,17 +60,20 @@ No new Google Cloud project needed. Reuse:
 
 ### 4. Add GitHub Actions secrets
 
-Push this folder to its own GitHub repository (can be private), then under
-Settings → Secrets and variables → Actions → New repository secret, add:
+This lives in the same `HR_AUTOMATION` repo as the Indeed scraper (as the
+`assessment-mailer/` subfolder), so it shares that repo's Settings → Secrets
+and variables → Actions.
+
+`GCP_SERVICE_ACCOUNT_JSON` and `SPREADSHEET_ID` are **already set** (the
+Indeed scraper uses those exact secret names) — nothing to do for those two.
+Add the 4 new ones:
 
 | Secret name | Value |
 |---|---|
-| `READ_GMAIL_ADDRESS` | same as the Indeed scraper's `GMAIL_ADDRESS` |
-| `READ_GMAIL_APP_PASSWORD` | same as the Indeed scraper's `GMAIL_APP_PASSWORD` |
+| `READ_GMAIL_ADDRESS` | same value as the Indeed scraper's `GMAIL_ADDRESS` secret |
+| `READ_GMAIL_APP_PASSWORD` | same value as the Indeed scraper's `GMAIL_APP_PASSWORD` secret |
 | `SEND_GMAIL_ADDRESS` | `kiara.dave@lumoslogic.com` |
 | `SEND_GMAIL_APP_PASSWORD` | the 16-character App Password for that mailbox |
-| `GCP_SERVICE_ACCOUNT_JSON` | paste the **entire contents** of the same service account JSON key used by the Indeed scraper |
-| `SPREADSHEET_ID` | same spreadsheet ID as the Indeed scraper |
 
 ### 5. Run it
 
@@ -78,7 +81,9 @@ Settings → Secrets and variables → Actions → New repository secret, add:
   trigger it manually the first time. Check the log to confirm it classified
   and sent correctly before trusting the schedule.
 - After that it runs automatically every 6 hours (see the cron comment in
-  `.github/workflows/send-assessments.yml` to change timing).
+  `../.github/workflows/send-assessments.yml` at the repo root to change
+  timing — GitHub Actions only reads workflow files from the repo's
+  top-level `.github/workflows/`, so it can't live in this subfolder).
 
 ## Running locally (optional, for testing)
 
