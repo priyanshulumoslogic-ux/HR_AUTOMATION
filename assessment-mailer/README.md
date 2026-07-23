@@ -1,7 +1,9 @@
 # HR Assessment Mailer (Gmail → role-specific technical assessment)
 
-Runs every 6 hours via GitHub Actions, offset 30 minutes after the [Indeed
-scraper](../src) in this same repo. Scans the same inbox that scraper reads for
+Runs every 5 minutes via GitHub Actions (the shortest interval GitHub
+Actions supports for scheduled workflows), so candidates get a reply
+shortly after applying rather than waiting on a 6-hourly batch. Scans the
+same inbox the [Indeed scraper](../src) in this same repo reads for
 application emails (subject containing "apply for", "application for",
 "intern", etc., with a resume attached), classifies the role from the
 subject line, and — for the roles it knows — sends the candidate an
@@ -78,13 +80,17 @@ separate mailbox this sends *from*:
 
 ### 5. Run it
 
-- Actions tab → "Send technical assessments (every 6h)" → **Run workflow** to
-  trigger it manually the first time. Check the log to confirm it classified
-  and sent correctly before trusting the schedule.
-- After that it runs automatically every 6 hours (see the cron comment in
+- Actions tab → "Send technical assessments (every 5min)" → **Run workflow**
+  to trigger it manually the first time. Check the log to confirm it
+  classified and sent correctly before trusting the schedule.
+- After that it runs automatically every 5 minutes (see the cron comment in
   `../.github/workflows/send-assessments.yml` at the repo root to change
   timing — GitHub Actions only reads workflow files from the repo's
   top-level `.github/workflows/`, so it can't live in this subfolder).
+  GitHub doesn't guarantee exact timing for scheduled jobs, especially at
+  high frequency, so expect "within a few minutes" rather than truly
+  instant — each run re-scans and dedups against the sheet, so a late or
+  skipped tick is never lost, just picked up by the next one.
 
 ## Running locally (optional, for testing)
 

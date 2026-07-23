@@ -1,11 +1,16 @@
-name: Send technical assessments (every 6h)
+name: Send technical assessments (every 5min)
 
-# Runs every 6 hours, offset 30 min after the Indeed scraper's :17 schedule
-# so it isn't racing IMAP logins against it: 00:47, 06:47, 12:47, 18:47 UTC
-# = 6:17 AM, 12:17 PM, 6:17 PM, 12:17 AM IST
+# Polls every 5 minutes - the shortest interval GitHub Actions supports for
+# scheduled workflows - so candidates get their assessment shortly after
+# applying rather than waiting for a 6-hourly batch. GitHub doesn't
+# guarantee exact timing for scheduled jobs (more so at high frequency, and
+# during platform load), so treat this as "within a few minutes," not
+# truly instant. Each run is independent and IMAP-searches from SINCE_DATE
+# with dedup against the sheet, so a late or skipped run just gets caught
+# by the next one - nothing is lost.
 on:
   schedule:
-    - cron: "47 */6 * * *"
+    - cron: "*/5 * * * *"
   workflow_dispatch: {}
 
 jobs:
