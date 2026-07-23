@@ -27,8 +27,8 @@ jobs:
       - name: Send assessments
         env:
           PYTHONUNBUFFERED: "1"
-          READ_GMAIL_ADDRESS: ${{ secrets.READ_GMAIL_ADDRESS }}
-          READ_GMAIL_APP_PASSWORD: ${{ secrets.READ_GMAIL_APP_PASSWORD }}
+          READ_GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          READ_GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           SEND_GMAIL_ADDRESS: ${{ secrets.SEND_GMAIL_ADDRESS }}
           SEND_GMAIL_APP_PASSWORD: ${{ secrets.SEND_GMAIL_APP_PASSWORD }}
           GCP_SERVICE_ACCOUNT_JSON: ${{ secrets.GCP_SERVICE_ACCOUNT_JSON }}

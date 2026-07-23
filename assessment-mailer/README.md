@@ -64,14 +64,15 @@ This lives in the same `HR_AUTOMATION` repo as the Indeed scraper (as the
 `assessment-mailer/` subfolder), so it shares that repo's Settings → Secrets
 and variables → Actions.
 
-`GCP_SERVICE_ACCOUNT_JSON` and `SPREADSHEET_ID` are **already set** (the
-Indeed scraper uses those exact secret names) — nothing to do for those two.
-Add the 4 new ones:
+`GCP_SERVICE_ACCOUNT_JSON`, `SPREADSHEET_ID`, `GMAIL_ADDRESS`, and
+`GMAIL_APP_PASSWORD` are **already set** (the Indeed scraper uses those
+exact secret names, and the workflow maps `GMAIL_ADDRESS` /
+`GMAIL_APP_PASSWORD` into `READ_GMAIL_ADDRESS` / `READ_GMAIL_APP_PASSWORD`
+for this script) — nothing to do for those. Add only the 2 new ones, for the
+separate mailbox this sends *from*:
 
 | Secret name | Value |
 |---|---|
-| `READ_GMAIL_ADDRESS` | same value as the Indeed scraper's `GMAIL_ADDRESS` secret |
-| `READ_GMAIL_APP_PASSWORD` | same value as the Indeed scraper's `GMAIL_APP_PASSWORD` secret |
 | `SEND_GMAIL_ADDRESS` | `kiara.dave@lumoslogic.com` |
 | `SEND_GMAIL_APP_PASSWORD` | the 16-character App Password for that mailbox |
 
