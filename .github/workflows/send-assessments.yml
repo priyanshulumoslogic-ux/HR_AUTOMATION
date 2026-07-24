@@ -1,16 +1,19 @@
 name: Send technical assessments (every 5min)
 
-# Polls every 5 minutes - the shortest interval GitHub Actions supports for
-# scheduled workflows - so candidates get their assessment shortly after
-# applying rather than waiting for a 6-hourly batch. GitHub doesn't
-# guarantee exact timing for scheduled jobs (more so at high frequency, and
-# during platform load), so treat this as "within a few minutes," not
-# truly instant. Each run is independent and IMAP-searches from SINCE_DATE
-# with dedup against the sheet, so a late or skipped run just gets caught
-# by the next one - nothing is lost.
+# The REAL 5-minute cadence is driven externally: an outside cron service
+# (e.g. cron-job.org) calls this workflow's workflow_dispatch API endpoint
+# every 5 minutes. GitHub's own `schedule:` trigger below is only a safety
+# net at a much slower cadence - GitHub explicitly treats `schedule:` as
+# best-effort and silently throttles high-frequency cron schedules (proven
+# in practice: a "*/5 * * * *" schedule here was actually firing 1-3 hours
+# apart), so it cannot be relied on alone for near-real-time delivery. See
+# assessment-mailer/README.md for the external cron setup steps. Each run
+# is independent and IMAP-searches from SINCE_DATE with dedup against the
+# sheet, so a late or skipped tick just gets caught by the next one -
+# nothing is lost either way.
 on:
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: "0 * * * *"
   workflow_dispatch: {}
 
 # If a run ever takes longer than 5 minutes, the next scheduled tick queues

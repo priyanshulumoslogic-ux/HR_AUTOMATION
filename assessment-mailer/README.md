@@ -92,14 +92,41 @@ separate mailbox this sends *from*:
 - Actions tab → "Send technical assessments (every 5min)" → **Run workflow**
   to trigger it manually the first time. Check the log to confirm it
   classified and sent correctly before trusting the schedule.
-- After that it runs automatically every 5 minutes (see the cron comment in
-  `../.github/workflows/send-assessments.yml` at the repo root to change
-  timing — GitHub Actions only reads workflow files from the repo's
-  top-level `.github/workflows/`, so it can't live in this subfolder).
-  GitHub doesn't guarantee exact timing for scheduled jobs, especially at
-  high frequency, so expect "within a few minutes" rather than truly
-  instant — each run re-scans and dedups against the sheet, so a late or
-  skipped tick is never lost, just picked up by the next one.
+
+### 6. Set up the real 5-minute trigger (external cron)
+
+GitHub's own `schedule:` trigger is unreliable at 5-minute frequency — it's
+documented as best-effort, and in testing a `*/5 * * * *` schedule here
+actually fired 1–3 hours apart. The workflow's built-in `schedule:` is kept
+at a slow hourly cadence purely as a fallback safety net; the real 5-minute
+cadence comes from an external service hitting GitHub's API directly:
+
+1. **Create a GitHub Personal Access Token** (fine-grained):
+   - GitHub → your profile picture → Settings → Developer settings →
+     Personal access tokens → Fine-grained tokens → **Generate new token**.
+   - Repository access: select **Only select repositories** → `HR_AUTOMATION`.
+   - Permissions → Repository permissions → **Actions** → set to
+     **Read and write**.
+   - Generate, then copy the token (starts with `github_pat_...`) — you
+     won't be able to view it again.
+2. **Create a free account at [cron-job.org](https://cron-job.org)** (or
+   any similar service that can POST on a schedule).
+3. **Create a new cron job** there:
+   - URL: `https://api.github.com/repos/priyanshulumoslogic-ux/HR_AUTOMATION/actions/workflows/send-assessments.yml/dispatches`
+   - Method: `POST`
+   - Headers:
+     - `Authorization: Bearer <your token from step 1>`
+     - `Accept: application/vnd.github+json`
+     - `Content-Type: application/json`
+   - Body: `{"ref": "main"}`
+   - Schedule: every 5 minutes.
+4. Save it, then check the repo's **Actions** tab — you should see new runs
+   appearing roughly every 5 minutes, triggered as `workflow_dispatch`
+   instead of `schedule`.
+
+Each run is independent and re-scans/dedups against the `AssessmentsSent`
+sheet, so a late or skipped tick (from either trigger) is never lost, just
+picked up by the next one.
 
 ## Running locally (optional, for testing)
 
