@@ -12,6 +12,15 @@ display name, or their resume, or their email address as a last resort).
 
 Every assessment email opens with the internship terms (3–6 month remote,
 unpaid with a possible performance-based stipend) before the role message.
+It's sent as an actual reply in the candidate's original thread (In-Reply-To
+/References headers set, subject prefixed "Re:"), not a new standalone
+email.
+
+Only reacts to applications received from `SINCE_DATE` in `src/config.py`
+onward — not the full mailbox history. Unlike the Indeed scraper (which
+only ever adds spreadsheet rows and safely re-scans everything since Jan 1
+every run), this script's mistakes are real emails sent to real people, so
+it deliberately doesn't re-scan the whole inbox history each run.
 
 Roles handled:
 

@@ -13,6 +13,14 @@ on:
     - cron: "*/5 * * * *"
   workflow_dispatch: {}
 
+# If a run ever takes longer than 5 minutes, the next scheduled tick queues
+# instead of starting in parallel - two overlapping runs could otherwise
+# both read the dedup sheet before either had written to it and send the
+# same candidate a duplicate assessment email.
+concurrency:
+  group: send-assessments
+  cancel-in-progress: false
+
 jobs:
   send:
     runs-on: ubuntu-latest

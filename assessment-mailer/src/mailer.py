@@ -8,24 +8,39 @@ import config
 import role_classifier
 import templates
 
-# (subject, body_fn, pdf_path). pdf_path is None for roles whose assessment
-# is a link/document rather than an attached file (AI Native video task).
+# body_fn only; the subject line is now always derived from the candidate's
+# original email ("Re: <their subject>") so the reply threads naturally,
+# rather than a fixed subject of our own.
 _ROLE_TO_TEMPLATE = {
-    role_classifier.QA: (templates.QA_SUBJECT, templates.qa_body, config.QA_ASSESSMENT_PDF),
-    role_classifier.FULLSTACK: (templates.FULLSTACK_SUBJECT, templates.fullstack_body, config.FULLSTACK_ASSESSMENT_PDF),
-    role_classifier.GRAPHIC: (templates.GRAPHIC_SUBJECT, templates.graphic_body, config.GRAPHIC_ASSESSMENT_PDF),
-    role_classifier.RECRUITER: (templates.RECRUITER_SUBJECT, templates.recruiter_body, config.RECRUITER_ASSESSMENT_PDF),
-    role_classifier.AI_NATIVE: (templates.AI_NATIVE_SUBJECT, templates.ai_native_body, None),
+    role_classifier.QA: (templates.qa_body, config.QA_ASSESSMENT_PDF),
+    role_classifier.FULLSTACK: (templates.fullstack_body, config.FULLSTACK_ASSESSMENT_PDF),
+    role_classifier.GRAPHIC: (templates.graphic_body, config.GRAPHIC_ASSESSMENT_PDF),
+    role_classifier.RECRUITER: (templates.recruiter_body, config.RECRUITER_ASSESSMENT_PDF),
+    role_classifier.AI_NATIVE: (templates.ai_native_body, None),
 }
 
 
-def send_assessment_email(to_email, candidate_name, role):
-    subject, body_fn, pdf_path = _ROLE_TO_TEMPLATE[role]
+def _reply_subject(original_subject):
+    if original_subject.strip().lower().startswith("re:"):
+        return original_subject
+    return f"Re: {original_subject}"
+
+
+def send_assessment_email(to_email, candidate_name, role, original_message_id, original_references, original_subject):
+    body_fn, pdf_path = _ROLE_TO_TEMPLATE[role]
 
     message = MIMEMultipart()
     message["From"] = config.SEND_GMAIL_ADDRESS
     message["To"] = to_email
-    message["Subject"] = subject
+    message["Subject"] = _reply_subject(original_subject)
+
+    # A synthetic "nomsgid:..." key (see gmail_reader._message_id_for) isn't
+    # a real Message-ID and can't be used to thread a reply - only set these
+    # headers when the candidate's email actually had one.
+    if not original_message_id.startswith("nomsgid:"):
+        message["In-Reply-To"] = original_message_id
+        message["References"] = f"{original_references} {original_message_id}".strip()
+
     message.attach(MIMEText(templates.with_terms(body_fn(candidate_name)), "plain"))
 
     if pdf_path is not None:

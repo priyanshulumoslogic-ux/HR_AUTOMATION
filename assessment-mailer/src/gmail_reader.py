@@ -32,6 +32,10 @@ def _subject_for(msg):
         return raw
 
 
+def _references_for(msg):
+    return (msg.get("References") or "").strip()
+
+
 def _from_for(msg):
     raw = msg.get("From", "")
     display_name, addr = parseaddr(raw)
@@ -69,11 +73,14 @@ def _pick_resume_attachment(msg):
 def fetch_candidate_emails(known_message_ids):
     """Connects over IMAP to the inbox that receives applications, searches
     for application emails, and returns a list of dicts for messages not
-    already present in known_message_ids. Each dict: message_id, subject,
-    display_name, from_email, resume_filename, resume_bytes. A resume
-    attachment is required, same signal the Indeed scraper uses to tell a
-    genuine application apart from a newsletter that merely mentions one of
-    the subject keywords.
+    already present in known_message_ids. Each dict: message_id, references,
+    subject, display_name, from_email, resume_filename, resume_bytes.
+    message_id/references are threaded back into the outgoing reply's
+    In-Reply-To/References headers so the assessment lands in the same
+    Gmail thread as the candidate's original application instead of as a
+    new, disconnected email. A resume attachment is required, same signal
+    the Indeed scraper uses to tell a genuine application apart from a
+    newsletter that merely mentions one of the subject keywords.
     """
     imap = imaplib.IMAP4_SSL(config.IMAP_HOST)
     try:
@@ -112,6 +119,7 @@ def fetch_candidate_emails(known_message_ids):
             display_name, from_email = _from_for(msg)
             results.append({
                 "message_id": message_id,
+                "references": _references_for(msg),
                 "subject": _subject_for(msg),
                 "display_name": display_name,
                 "from_email": from_email,

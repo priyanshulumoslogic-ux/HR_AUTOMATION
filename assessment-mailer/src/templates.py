@@ -1,11 +1,5 @@
 import config
 
-QA_SUBJECT = "QA Intern Technical Assessment - Lumos Logic"
-FULLSTACK_SUBJECT = "Full Stack Intern Technical Assessment - Lumos Logic"
-GRAPHIC_SUBJECT = "Graphic Designer Assessment - Lumos Logic"
-RECRUITER_SUBJECT = "Recruiter Intern Assessment - Lumos Logic"
-AI_NATIVE_SUBJECT = "AI Native Internship - Video Assessment | LumosLogic"
-
 
 def with_terms(body):
     """Every assessment email leads with the internship terms, then the

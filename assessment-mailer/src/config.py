@@ -18,9 +18,18 @@ SMTP_HOST = "smtp.gmail.com"
 SMTP_PORT = 465
 MAILBOX = "INBOX"
 
-# Fixed forever - never roll this forward. Dedup happens against the sheet,
-# so re-scanning the full range each run is cheap and avoids boundary misses.
-SINCE_DATE = "01-Jan-2026"
+# Unlike the Indeed scraper (which only ever adds spreadsheet rows), this
+# script sends real emails to real candidates - so, deliberately, it does
+# NOT mirror the Indeed scraper's "fixed forever, since Jan 1" cutoff. That
+# pattern is safe for a script whose worst-case re-run mistake is a
+# duplicate sheet row, but not for one whose worst-case mistake is mass-
+# emailing a mailbox's entire history the first time it runs (which is
+# exactly what happened before this cutoff existed). Bump this forward
+# periodically if needed, but never back past a date you're comfortable
+# emailing every unprocessed matching applicant since. Dedup against the
+# AssessmentsSent sheet is what actually prevents repeat sends day to day;
+# this date is purely a blast-radius bound if that sheet is ever reset.
+SINCE_DATE = "24-Jul-2026"
 
 # Same broad set the Indeed scraper searches on - this is what qualifies an
 # email as "an application" at all. Role classification (QA vs Full Stack)

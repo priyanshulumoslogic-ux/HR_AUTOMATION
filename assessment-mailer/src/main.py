@@ -44,7 +44,12 @@ def process_candidate(candidate):
     text = resume_text.extract_text(candidate["resume_filename"], candidate["resume_bytes"])
     name = candidate_name.resolve(candidate["display_name"], candidate["from_email"], text)
 
-    mailer.send_assessment_email(candidate["from_email"], name, role)
+    mailer.send_assessment_email(
+        candidate["from_email"], name, role,
+        original_message_id=candidate["message_id"],
+        original_references=candidate["references"],
+        original_subject=candidate["subject"],
+    )
 
     row = [
         candidate["message_id"],
