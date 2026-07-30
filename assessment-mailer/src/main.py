@@ -19,6 +19,7 @@ _ROLE_LABEL = {
     role_classifier.GRAPHIC: "Graphic Designer",
     role_classifier.RECRUITER: "Recruiter Intern",
     role_classifier.AI_NATIVE: "AI Native Intern",
+    role_classifier.MOBILE: "Mobile Application Intern",
 }
 
 

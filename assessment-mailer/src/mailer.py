@@ -17,6 +17,7 @@ _ROLE_TO_TEMPLATE = {
     role_classifier.GRAPHIC: (templates.graphic_body, config.GRAPHIC_ASSESSMENT_PDF),
     role_classifier.RECRUITER: (templates.recruiter_body, config.RECRUITER_ASSESSMENT_PDF),
     role_classifier.AI_NATIVE: (templates.ai_native_body, None),
+    role_classifier.MOBILE: (templates.mobile_body, None),
 }
 
 

@@ -125,6 +125,28 @@ def recruiter_body(name):
     return _generic_assessment_body(name, "Recruiter Intern")
 
 
+def mobile_body(name):
+    """No attached task for this role - just move-to-next-stage plus the
+    shared submission form, unlike the other role bodies above."""
+    return f"""Hi {name},
+
+Thank you for applying for the Mobile Application Intern position at Lumos Logic.
+
+We're excited to move you to the next stage of our hiring process.
+
+Kindly fill out the submission form below with your details:
+
+Submission Form:
+{config.ASSESSMENT_FORM_URL}
+
+If you have any questions, feel free to reply to this email.
+
+We look forward to hearing from you.
+
+{config.SIGNATURE}
+"""
+
+
 def ai_native_body(name):
     return f"""Hi {name},
 

@@ -3,6 +3,7 @@ FULLSTACK = "fullstack"
 GRAPHIC = "graphic"
 RECRUITER = "recruiter"
 AI_NATIVE = "ai_native"
+MOBILE = "mobile"
 
 # Order matters only for readability - classify() counts how many distinct
 # roles a subject matches and only returns one when exactly one matches, so
@@ -16,6 +17,10 @@ _ROLE_KEYWORDS = [
         "ai native", "ai-native",
         "digital marketing & growth", "digital marketing and growth",
         "sales & business development", "sales and business development",
+    ]),
+    (MOBILE, [
+        "mobile application", "mobile app development", "mobile developer",
+        "android developer", "ios developer", "react native",
     ]),
 ]
 
