@@ -89,17 +89,22 @@ separate mailbox this sends *from*:
 
 ### 5. Run it
 
-- Actions tab → "Send technical assessments (every 5min)" → **Run workflow**
+- Actions tab → "Send technical assessments (every 30min)" → **Run workflow**
   to trigger it manually the first time. Check the log to confirm it
   classified and sent correctly before trusting the schedule.
 
-### 6. Set up the real 5-minute trigger (external cron)
+### 6. Set up the real 30-minute trigger (external cron)
 
-GitHub's own `schedule:` trigger is unreliable at 5-minute frequency — it's
+GitHub's own `schedule:` trigger is unreliable at high frequency — it's
 documented as best-effort, and in testing a `*/5 * * * *` schedule here
 actually fired 1–3 hours apart. The workflow's built-in `schedule:` is kept
-at a slow hourly cadence purely as a fallback safety net; the real 5-minute
-cadence comes from an external service hitting GitHub's API directly:
+at a slow hourly cadence purely as a fallback safety net; the real 30-minute
+cadence comes from an external service hitting GitHub's API directly.
+
+A 30-minute interval was chosen over 5 minutes because cron-job.org's free
+tier caps out at 2,000 executions/month — 5-minute ticks (~8,640/month) blow
+through that cap partway through the month, while 30-minute ticks
+(~1,440/month) stay under it:
 
 1. **Create a GitHub Personal Access Token** (fine-grained):
    - GitHub → your profile picture → Settings → Developer settings →
@@ -119,9 +124,9 @@ cadence comes from an external service hitting GitHub's API directly:
      - `Accept: application/vnd.github+json`
      - `Content-Type: application/json`
    - Body: `{"ref": "main"}`
-   - Schedule: every 5 minutes.
+   - Schedule: every 30 minutes.
 4. Save it, then check the repo's **Actions** tab — you should see new runs
-   appearing roughly every 5 minutes, triggered as `workflow_dispatch`
+   appearing roughly every 30 minutes, triggered as `workflow_dispatch`
    instead of `schedule`.
 
 Each run is independent and re-scans/dedups against the `AssessmentsSent`
