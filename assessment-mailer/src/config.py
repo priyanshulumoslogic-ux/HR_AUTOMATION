@@ -9,6 +9,32 @@ READ_GMAIL_APP_PASSWORD = os.environ["READ_GMAIL_APP_PASSWORD"]
 SEND_GMAIL_ADDRESS = os.environ["SEND_GMAIL_ADDRESS"]
 SEND_GMAIL_APP_PASSWORD = os.environ["SEND_GMAIL_APP_PASSWORD"]
 
+# Every application inbox this reads from, paired with the address the reply
+# should be sent from. The original mailbox reads from one address
+# (READ_GMAIL_ADDRESS) and replies from a separate HR sender
+# (SEND_GMAIL_ADDRESS). GMAIL_ADDRESS_2 is a second, self-contained mailbox
+# that both receives applications and sends its own replies from itself, so
+# read and send addresses/passwords are the same for it. Optional - only
+# added once its secrets exist, so the existing single-mailbox setup keeps
+# working untouched if it's never set.
+MAILBOXES = [
+    {
+        "read_address": READ_GMAIL_ADDRESS,
+        "read_app_password": READ_GMAIL_APP_PASSWORD,
+        "send_address": SEND_GMAIL_ADDRESS,
+        "send_app_password": SEND_GMAIL_APP_PASSWORD,
+    },
+]
+_address_2 = os.environ.get("GMAIL_ADDRESS_2")
+if _address_2:
+    _app_password_2 = os.environ["GMAIL_APP_PASSWORD_2"]
+    MAILBOXES.append({
+        "read_address": _address_2,
+        "read_app_password": _app_password_2,
+        "send_address": _address_2,
+        "send_app_password": _app_password_2,
+    })
+
 # --- Dedup tracking sheet (same spreadsheet the Indeed scraper writes to) ---
 SPREADSHEET_ID = os.environ["SPREADSHEET_ID"]
 SERVICE_ACCOUNT_INFO = json.loads(os.environ["GCP_SERVICE_ACCOUNT_JSON"])

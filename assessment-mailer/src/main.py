@@ -50,6 +50,8 @@ def process_candidate(candidate):
         original_message_id=candidate["message_id"],
         original_references=candidate["references"],
         original_subject=candidate["subject"],
+        send_address=candidate["send_address"],
+        send_app_password=candidate["send_app_password"],
     )
 
     row = [

@@ -7,6 +7,15 @@ SPREADSHEET_ID = os.environ["SPREADSHEET_ID"]
 DRIVE_FOLDER_ID = os.environ["DRIVE_FOLDER_ID"]
 SERVICE_ACCOUNT_INFO = json.loads(os.environ["GCP_SERVICE_ACCOUNT_JSON"])
 
+# Every inbox that receives applications and should be scraped into the same
+# sheet/Drive folder. GMAIL_ADDRESS_2 is optional - only added once its
+# secrets exist, so the existing single-mailbox setup keeps working untouched
+# if it's never set.
+MAILBOXES = [(GMAIL_ADDRESS, GMAIL_APP_PASSWORD)]
+_address_2 = os.environ.get("GMAIL_ADDRESS_2")
+if _address_2:
+    MAILBOXES.append((_address_2, os.environ["GMAIL_APP_PASSWORD_2"]))
+
 IMAP_HOST = "imap.gmail.com"
 # Without this, a stalled connection (network blip, Gmail throttling) hangs
 # the blocking IMAP call forever instead of raising.

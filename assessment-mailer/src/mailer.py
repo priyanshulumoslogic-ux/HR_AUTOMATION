@@ -27,11 +27,17 @@ def _reply_subject(original_subject):
     return f"Re: {original_subject}"
 
 
-def send_assessment_email(to_email, candidate_name, role, original_message_id, original_references, original_subject):
+def send_assessment_email(to_email, candidate_name, role, original_message_id, original_references, original_subject,
+                           send_address, send_app_password):
+    """Sends the reply from send_address/send_app_password - each candidate
+    carries its own mailbox's send credentials (see gmail_reader.py), since
+    different application inboxes can reply from different addresses (e.g.
+    a self-contained mailbox replies from itself rather than the shared HR
+    sender)."""
     body_fn, pdf_path = _ROLE_TO_TEMPLATE[role]
 
     message = MIMEMultipart()
-    message["From"] = config.SEND_GMAIL_ADDRESS
+    message["From"] = send_address
     message["To"] = to_email
     message["Subject"] = _reply_subject(original_subject)
 
@@ -51,5 +57,5 @@ def send_assessment_email(to_email, candidate_name, role, original_message_id, o
         message.attach(attachment)
 
     with smtplib.SMTP_SSL(config.SMTP_HOST, config.SMTP_PORT) as smtp:
-        smtp.login(config.SEND_GMAIL_ADDRESS, config.SEND_GMAIL_APP_PASSWORD)
-        smtp.sendmail(config.SEND_GMAIL_ADDRESS, [to_email], message.as_string())
+        smtp.login(send_address, send_app_password)
+        smtp.sendmail(send_address, [to_email], message.as_string())

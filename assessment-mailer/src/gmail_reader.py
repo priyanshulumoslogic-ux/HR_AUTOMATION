@@ -71,20 +71,32 @@ def _pick_resume_attachment(msg):
 
 
 def fetch_candidate_emails(known_message_ids):
-    """Connects over IMAP to the inbox that receives applications, searches
-    for application emails, and returns a list of dicts for messages not
-    already present in known_message_ids. Each dict: message_id, references,
-    subject, display_name, from_email, resume_filename, resume_bytes.
+    """Connects over IMAP to every mailbox in config.MAILBOXES, searches each
+    for application emails, and returns a combined list of dicts for
+    messages not already present in known_message_ids. Each dict:
+    message_id, references, subject, display_name, from_email,
+    resume_filename, resume_bytes, send_address, send_app_password.
     message_id/references are threaded back into the outgoing reply's
     In-Reply-To/References headers so the assessment lands in the same
     Gmail thread as the candidate's original application instead of as a
     new, disconnected email. A resume attachment is required, same signal
     the Indeed scraper uses to tell a genuine application apart from a
     newsletter that merely mentions one of the subject keywords.
+    send_address/send_app_password carry each mailbox's own reply
+    credentials through to mailer.py, since different mailboxes can reply
+    from different addresses.
     """
+    results = []
+    for mailbox in config.MAILBOXES:
+        print(f"-- scanning {mailbox['read_address']} --", flush=True)
+        results.extend(_fetch_from_mailbox(mailbox, known_message_ids))
+    return results
+
+
+def _fetch_from_mailbox(mailbox, known_message_ids):
     imap = imaplib.IMAP4_SSL(config.IMAP_HOST, timeout=config.IMAP_TIMEOUT)
     try:
-        imap.login(config.READ_GMAIL_ADDRESS, config.READ_GMAIL_APP_PASSWORD)
+        imap.login(mailbox["read_address"], mailbox["read_app_password"])
         imap.select(config.MAILBOX, readonly=True)
 
         typ, data = imap.search(None, _build_search_criteria())
@@ -139,6 +151,8 @@ def fetch_candidate_emails(known_message_ids):
                 "from_email": from_email,
                 "resume_filename": resume_filename,
                 "resume_bytes": resume_bytes,
+                "send_address": mailbox["send_address"],
+                "send_app_password": mailbox["send_app_password"],
             })
 
         if skipped_known:

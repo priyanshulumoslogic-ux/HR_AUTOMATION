@@ -73,13 +73,22 @@ def _pick_resume_attachment(msg):
 
 
 def fetch_matching_applications(known_message_ids):
-    """Connects over IMAP, searches for application emails, and returns a
-    list of dicts for messages not already present in known_message_ids.
-    Each dict: message_id, from_email, applied_date, resume_filename, resume_bytes.
+    """Connects over IMAP to every mailbox in config.MAILBOXES, searches each
+    for application emails, and returns a combined list of dicts for messages
+    not already present in known_message_ids. Each dict: message_id,
+    from_email, applied_date, resume_filename, resume_bytes.
     """
+    results = []
+    for address, app_password in config.MAILBOXES:
+        print(f"-- scanning {address} --", flush=True)
+        results.extend(_fetch_from_mailbox(address, app_password, known_message_ids))
+    return results
+
+
+def _fetch_from_mailbox(address, app_password, known_message_ids):
     imap = imaplib.IMAP4_SSL(config.IMAP_HOST, timeout=config.IMAP_TIMEOUT)
     try:
-        imap.login(config.GMAIL_ADDRESS, config.GMAIL_APP_PASSWORD)
+        imap.login(address, app_password)
         imap.select(config.MAILBOX, readonly=True)
 
         typ, data = imap.search(None, _build_search_criteria())

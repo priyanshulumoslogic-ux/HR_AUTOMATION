@@ -87,6 +87,19 @@ separate mailbox this sends *from*:
 | `SEND_GMAIL_ADDRESS` | `kiara.dave@lumoslogic.com` |
 | `SEND_GMAIL_APP_PASSWORD` | the 16-character App Password for that mailbox |
 
+### 4b. (Optional) Add a second, self-contained mailbox
+
+For a second application inbox that should reply to candidates from
+*itself* (e.g. `kiara.lumoslogic@gmail.com` reading its own applications
+and sending its own assessment emails, rather than via the shared
+`SEND_GMAIL_ADDRESS` sender above), reuse the same `GMAIL_ADDRESS_2` /
+`GMAIL_APP_PASSWORD_2` secrets from the [Indeed scraper's README](../README.md#5b-optional-add-a-second-inbox-to-scrape)
+— no new secrets needed here, this script picks them up automatically.
+Candidates found in that mailbox get sent their assessment from that same
+address, threaded into their original reply as normal. Dedup is tracked in
+the same `AssessmentsSent` tab as the primary mailbox. Leave `GMAIL_ADDRESS_2`
+unset and nothing changes — this only reads/sends via the mailbox above.
+
 ### 5. Run it
 
 - Actions tab → "Send technical assessments (every 30min)" → **Run workflow**

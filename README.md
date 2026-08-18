@@ -57,6 +57,19 @@ In this repository: Settings → Secrets and variables → Actions → New repos
 | `SPREADSHEET_ID` | the sheet ID from step 4 |
 | `DRIVE_FOLDER_ID` | the Shared Drive ID from step 4 |
 
+### 5b. (Optional) Add a second inbox to scrape
+
+To also scan a second inbox (e.g. `kiara.lumoslogic@gmail.com`) into this
+same sheet and Drive folder, enable IMAP and create an App Password for it
+(steps 1–2 above, repeated for that account), then add 2 more secrets:
+
+| Secret name | Value |
+|---|---|
+| `GMAIL_ADDRESS_2` | the second Gmail address |
+| `GMAIL_APP_PASSWORD_2` | its 16-character app password |
+
+Leave these unset and nothing changes — the sync only scans `GMAIL_ADDRESS`.
+
 ### 6. Push this repo to GitHub and run it
 
 Push this folder to a GitHub repository (can be private). Then:
