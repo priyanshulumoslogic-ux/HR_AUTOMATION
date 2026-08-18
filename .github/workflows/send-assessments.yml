@@ -28,8 +28,9 @@ jobs:
     runs-on: ubuntu-latest
     # Backstop in case something still hangs despite the IMAP socket timeout -
     # without this, a stuck run blocks every later tick indefinitely (see
-    # concurrency group above).
-    timeout-minutes: 20
+    # concurrency group above). 45 min gives a first catch-up run (after any
+    # gap) room to finish before the next scheduled tick would queue anyway.
+    timeout-minutes: 45
     defaults:
       run:
         working-directory: assessment-mailer

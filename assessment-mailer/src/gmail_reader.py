@@ -96,9 +96,23 @@ def fetch_candidate_emails(known_message_ids):
 
         results = []
         skipped_no_resume = 0
+        skipped_known = 0
         for fetch_i, num in enumerate(message_nums, start=1):
             if fetch_i == 1 or fetch_i % 25 == 0 or fetch_i == len(message_nums):
                 print(f"  fetching {fetch_i}/{len(message_nums)}...", flush=True)
+
+            # Most matched messages here are ones already sent an assessment
+            # on a past run. A full RFC822 fetch downloads the whole email
+            # plus every attachment, so doing that just to throw the result
+            # away wastes most of each run's time as the mailbox grows. Check
+            # the Message-ID with a cheap header-only fetch first and skip
+            # the full download when it's already known.
+            typ, hdr_data = imap.fetch(num, "(BODY.PEEK[HEADER.FIELDS (MESSAGE-ID)])")
+            if typ == "OK" and hdr_data and hdr_data[0]:
+                probe_id = email.message_from_bytes(hdr_data[0][1]).get("Message-ID")
+                if probe_id and probe_id.strip() in known_message_ids:
+                    skipped_known += 1
+                    continue
 
             typ, msg_data = imap.fetch(num, "(RFC822)")
             if typ != "OK" or not msg_data or not msg_data[0]:
@@ -127,6 +141,8 @@ def fetch_candidate_emails(known_message_ids):
                 "resume_bytes": resume_bytes,
             })
 
+        if skipped_known:
+            print(f"Skipped {skipped_known} already-recorded email(s) via header-only check.", flush=True)
         if skipped_no_resume:
             print(f"Skipped {skipped_no_resume} subject-matching email(s) with no resume attachment.", flush=True)
 

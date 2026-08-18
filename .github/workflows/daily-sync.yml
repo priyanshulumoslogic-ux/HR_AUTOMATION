@@ -10,7 +10,12 @@ on:
 jobs:
   sync:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # Generous: SINCE_DATE never rolls forward, so a first catch-up run after
+    # any gap re-scans the mailbox's full history since Jan 1. The header-only
+    # dedup check in gmail_client.py keeps already-recorded messages cheap,
+    # but a large batch of genuinely new ones (each a full email + attachment
+    # download) can still take a while. Backstop only - not the expected time.
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
 
