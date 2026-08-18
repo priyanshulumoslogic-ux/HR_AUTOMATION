@@ -14,6 +14,10 @@ SPREADSHEET_ID = os.environ["SPREADSHEET_ID"]
 SERVICE_ACCOUNT_INFO = json.loads(os.environ["GCP_SERVICE_ACCOUNT_JSON"])
 
 IMAP_HOST = "imap.gmail.com"
+# Without this, a stalled connection (network blip, Gmail throttling) hangs
+# the blocking IMAP call forever instead of raising - which then blocks every
+# later scheduled run too, since this workflow only allows one run at a time.
+IMAP_TIMEOUT = 60
 SMTP_HOST = "smtp.gmail.com"
 SMTP_PORT = 465
 MAILBOX = "INBOX"

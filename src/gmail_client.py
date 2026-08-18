@@ -77,7 +77,7 @@ def fetch_matching_applications(known_message_ids):
     list of dicts for messages not already present in known_message_ids.
     Each dict: message_id, from_email, applied_date, resume_filename, resume_bytes.
     """
-    imap = imaplib.IMAP4_SSL(config.IMAP_HOST)
+    imap = imaplib.IMAP4_SSL(config.IMAP_HOST, timeout=config.IMAP_TIMEOUT)
     try:
         imap.login(config.GMAIL_ADDRESS, config.GMAIL_APP_PASSWORD)
         imap.select(config.MAILBOX, readonly=True)

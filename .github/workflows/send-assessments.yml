@@ -26,6 +26,10 @@ concurrency:
 jobs:
   send:
     runs-on: ubuntu-latest
+    # Backstop in case something still hangs despite the IMAP socket timeout -
+    # without this, a stuck run blocks every later tick indefinitely (see
+    # concurrency group above).
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: assessment-mailer

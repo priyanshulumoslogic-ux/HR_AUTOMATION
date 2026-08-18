@@ -8,6 +8,9 @@ DRIVE_FOLDER_ID = os.environ["DRIVE_FOLDER_ID"]
 SERVICE_ACCOUNT_INFO = json.loads(os.environ["GCP_SERVICE_ACCOUNT_JSON"])
 
 IMAP_HOST = "imap.gmail.com"
+# Without this, a stalled connection (network blip, Gmail throttling) hangs
+# the blocking IMAP call forever instead of raising.
+IMAP_TIMEOUT = 60
 MAILBOX = "INBOX"
 
 # Fixed forever - never roll this forward. Dedup happens against the sheet,

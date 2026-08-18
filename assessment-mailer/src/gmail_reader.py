@@ -82,7 +82,7 @@ def fetch_candidate_emails(known_message_ids):
     the Indeed scraper uses to tell a genuine application apart from a
     newsletter that merely mentions one of the subject keywords.
     """
-    imap = imaplib.IMAP4_SSL(config.IMAP_HOST)
+    imap = imaplib.IMAP4_SSL(config.IMAP_HOST, timeout=config.IMAP_TIMEOUT)
     try:
         imap.login(config.READ_GMAIL_ADDRESS, config.READ_GMAIL_APP_PASSWORD)
         imap.select(config.MAILBOX, readonly=True)
