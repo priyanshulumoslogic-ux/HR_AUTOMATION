@@ -89,7 +89,15 @@ def fetch_candidate_emails(known_message_ids):
     results = []
     for mailbox in config.MAILBOXES:
         print(f"-- scanning {mailbox['read_address']} --", flush=True)
-        results.extend(_fetch_from_mailbox(mailbox, known_message_ids))
+        try:
+            results.extend(_fetch_from_mailbox(mailbox, known_message_ids))
+        except (imaplib.IMAP4.abort, imaplib.IMAP4.error, OSError, TimeoutError) as exc:
+            # A dropped/stalled IMAP session (Gmail closing a long-lived
+            # connection, a network blip) shouldn't take the other
+            # mailboxes down with it - log it and move on. SINCE_DATE never
+            # rolls forward, so this mailbox's full range gets retried
+            # automatically next run; nothing is lost, just delayed.
+            print(f"  ! FAILED scanning {mailbox['read_address']}: {exc} - skipping for this run, will retry next run", flush=True)
     return results
 
 
