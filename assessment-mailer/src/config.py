@@ -67,6 +67,12 @@ SINCE_DATE = "24-Jul-2026"
 SUBJECT_KEYWORDS = [
     "apply for", "application for", "applying for", "applied for",
     "intern", "job opportunity",
+    # Bare "application" catches subjects that state the word without "for"
+    # right after it, e.g. "<Role> Application - <Name>" (missed a real
+    # Forward Deployed Engineer applicant before this was added). The
+    # required resume attachment (see gmail_reader.py) is what keeps this
+    # from over-matching newsletters that merely mention "application".
+    "application",
 ]
 
 RESUME_EXTENSIONS = (".pdf", ".docx")
