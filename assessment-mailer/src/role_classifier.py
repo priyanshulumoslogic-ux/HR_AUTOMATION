@@ -30,7 +30,12 @@ _ROLE_KEYWORDS = [
         "mobile application", "mobile app development", "mobile developer",
         "android developer", "ios developer", "react native",
     ]),
-    (FDE, ["forward deployed engineer", "forward-deployed engineer"]),
+    (FDE, [
+        # Candidates write this both ways ("deployed" vs "deployment") -
+        # match both so a real applicant's subject line isn't missed.
+        "forward deployed engineer", "forward-deployed engineer",
+        "forward deployment engineer", "forward-deployment engineer",
+    ]),
     (PRODUCT_ENGINEER, ["product engineer"]),
 ]
 
