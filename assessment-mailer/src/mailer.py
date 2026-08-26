@@ -22,6 +22,11 @@ _ROLE_TO_TEMPLATE = {
     role_classifier.PRODUCT_ENGINEER: (templates.product_engineer_body, config.PRODUCT_ENGINEER_ASSESSMENT_PDF),
 }
 
+# These two roles' body text was given to us as the complete email as-is -
+# it never included the internship terms paragraph the other roles lead
+# with, so it's not prepended for them.
+_NO_TERMS_ROLES = {role_classifier.FDE, role_classifier.PRODUCT_ENGINEER}
+
 
 def _reply_subject(original_subject):
     if original_subject.strip().lower().startswith("re:"):
@@ -50,7 +55,10 @@ def send_assessment_email(to_email, candidate_name, role, original_message_id, o
         message["In-Reply-To"] = original_message_id
         message["References"] = f"{original_references} {original_message_id}".strip()
 
-    message.attach(MIMEText(templates.with_terms(body_fn(candidate_name)), "plain"))
+    body = body_fn(candidate_name)
+    if role not in _NO_TERMS_ROLES:
+        body = templates.with_terms(body)
+    message.attach(MIMEText(body, "plain"))
 
     if pdf_path is not None:
         with open(pdf_path, "rb") as f:
