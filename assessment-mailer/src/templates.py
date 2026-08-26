@@ -147,6 +147,76 @@ We look forward to hearing from you.
 """
 
 
+def _fde_style_body(name, role_name):
+    """Shared assessment body for Forward Deployed Engineer and Product
+    Engineer - same task, same format, only the role name differs."""
+    return f"""Hi {name},
+
+Thank you for applying for the {role_name} position at LumosLogic.
+
+As the next step in our selection process, we'd like you to complete a technical assessment. This task will help us evaluate your technical problem-solving, product understanding, API/integration skills, ability to work with real-world requirements, and approach to building practical and scalable solutions.
+
+Technical Assessment Instructions
+
+Please review the complete task details and requirements provided in the assignment document.
+
+Reference Application:
+Daily Planner / To-Do List – Google Play
+
+Key Requirements
+
+- Focus on building a practical MVP based on the provided product requirements.
+- You are expected to think from both a technical and customer/product perspective.
+- Consider how the solution can be configured or adapted based on different customer requirements.
+- Design and work with APIs, integrations, data, and backend services where required.
+- Use Supabase or a suitable alternative rather than building the backend from scratch.
+- You are encouraged to use AI tools efficiently during development.
+- The solution should be scalable, maintainable, and well understood by you.
+- Focus on solving the core problem rather than implementing unnecessary features.
+
+Submission Guidelines
+
+- Complete the assignment within 2 days of receiving it.
+- If you need additional time, please communicate this in advance.
+- Please share a brief progress update every day, including:
+  - What you completed
+  - What you are currently working on
+  - Any blockers or challenges
+  - What you plan to complete next
+
+Once completed, please send your submission to:
+hello@lumoslogic.com
+
+Please include, as applicable:
+
+- Working application / prototype
+- Source code repository
+- Technical documentation
+- Architecture/design
+- API and integration details
+- Database/schema design
+- Deployment/setup instructions
+- Key assumptions and technical decisions
+- Any limitations or future improvements
+
+The application does not need to be fully production-ready. We are primarily interested in your problem-solving approach, technical implementation, integration thinking, ability to handle real-world requirements, scalability, and communication of technical decisions.
+
+If you have any questions regarding the assessment, feel free to reply to this email.
+
+We look forward to reviewing your submission.
+
+{config.SIGNATURE}
+"""
+
+
+def fde_body(name):
+    return _fde_style_body(name, "Forward Deployed Engineer")
+
+
+def product_engineer_body(name):
+    return _fde_style_body(name, "Product Engineer")
+
+
 def ai_native_body(name):
     return f"""Hi {name},
 

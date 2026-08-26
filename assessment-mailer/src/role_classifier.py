@@ -4,6 +4,8 @@ GRAPHIC = "graphic"
 RECRUITER = "recruiter"
 AI_NATIVE = "ai_native"
 MOBILE = "mobile"
+FDE = "fde"
+PRODUCT_ENGINEER = "product_engineer"
 
 # Order matters only for readability - classify() counts how many distinct
 # roles a subject matches and only returns one when exactly one matches, so
@@ -14,14 +16,22 @@ _ROLE_KEYWORDS = [
     (GRAPHIC, ["graphic design", "graphic designer", "graphics designer"]),
     (RECRUITER, ["recruiter", "recruitment intern", "talent acquisition"]),
     (AI_NATIVE, [
-        "ai native", "ai-native",
-        "digital marketing & growth", "digital marketing and growth",
-        "sales & business development", "sales and business development",
+        # Bare "ai native"/"ai-native" used to be its own keyword, which
+        # wrongly matched *any* AI Native role (e.g. an unrelated AI Native
+        # engineering posting) as this one. Only the full role phrase - AI
+        # Native + Digital Marketing & Growth, or AI Native + Sales &
+        # Business Development - counts now.
+        "ai native digital marketing & growth", "ai native digital marketing and growth",
+        "ai-native digital marketing & growth", "ai-native digital marketing and growth",
+        "ai native sales & business development", "ai native sales and business development",
+        "ai-native sales & business development", "ai-native sales and business development",
     ]),
     (MOBILE, [
         "mobile application", "mobile app development", "mobile developer",
         "android developer", "ios developer", "react native",
     ]),
+    (FDE, ["forward deployed engineer", "forward-deployed engineer"]),
+    (PRODUCT_ENGINEER, ["product engineer"]),
 ]
 
 

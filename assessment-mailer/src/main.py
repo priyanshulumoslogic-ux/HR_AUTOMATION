@@ -20,6 +20,8 @@ _ROLE_LABEL = {
     role_classifier.RECRUITER: "Recruiter Intern",
     role_classifier.AI_NATIVE: "AI Native Intern",
     role_classifier.MOBILE: "Mobile Application Intern",
+    role_classifier.FDE: "Forward Deployed Engineer",
+    role_classifier.PRODUCT_ENGINEER: "Product Engineer",
 }
 
 

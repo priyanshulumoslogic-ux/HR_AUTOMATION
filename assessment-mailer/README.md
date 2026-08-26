@@ -30,8 +30,17 @@ Roles handled:
 | Full Stack Intern | Full Stack assessment message | Full Stack PDF |
 | Graphic Designer | Full-Stack-style message | Graphic Designer PDF |
 | Recruiter Intern | Full-Stack-style message | Recruiter Intern PDF |
+| Mobile Application Intern | move-to-next-stage + form message | none |
 | AI Native Digital Marketing & Growth Intern | Video assessment message | none (doc + form links) |
 | AI Native Sales & Business Development Intern | same video message | none (doc + form links) |
+| Forward Deployed Engineer | technical assessment message | none (task inline in the email) |
+| Product Engineer | same technical assessment message | none (task inline in the email) |
+
+The AI Native roles only match on the full phrase — "AI Native"/"AI-Native"
+*combined with* "Digital Marketing & Growth" or "Sales & Business
+Development" in the subject. A bare "AI Native"/"AI-Native" no longer
+matches by itself, since that previously misfired on unrelated postings
+that happened to also say "AI Native" in the title.
 
 Applications for any other role, or ambiguous subjects that match more than
 one role, are skipped and just logged to the run output — no email sent,
