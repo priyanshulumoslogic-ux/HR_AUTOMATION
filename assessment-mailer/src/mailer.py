@@ -18,7 +18,7 @@ _ROLE_TO_TEMPLATE = {
     role_classifier.RECRUITER: (templates.recruiter_body, config.RECRUITER_ASSESSMENT_PDF),
     role_classifier.AI_NATIVE: (templates.ai_native_body, None),
     role_classifier.MOBILE: (templates.mobile_body, None),
-    role_classifier.FDE: (templates.fde_body, None),
+    role_classifier.FDE: (templates.fde_body, config.FDE_ASSESSMENT_PDF),
     role_classifier.PRODUCT_ENGINEER: (templates.product_engineer_body, config.PRODUCT_ENGINEER_ASSESSMENT_PDF),
 }
 
@@ -57,6 +57,32 @@ def send_assessment_email(to_email, candidate_name, role, original_message_id, o
             attachment = MIMEApplication(f.read(), _subtype="pdf")
         attachment.add_header("Content-Disposition", "attachment", filename=os.path.basename(pdf_path))
         message.attach(attachment)
+
+    with smtplib.SMTP_SSL(config.SMTP_HOST, config.SMTP_PORT) as smtp:
+        smtp.login(send_address, send_app_password)
+        smtp.sendmail(send_address, [to_email], message.as_string())
+
+
+def send_followup_email(to_email, candidate_name, original_message_id, original_references, original_subject,
+                         send_address, send_app_password, pdf_path):
+    """One-off follow-up reply (see templates.fde_followup_body) threaded
+    into the same original application email as the initial assessment
+    reply, so it lands in the same Gmail thread."""
+    message = MIMEMultipart()
+    message["From"] = send_address
+    message["To"] = to_email
+    message["Subject"] = _reply_subject(original_subject)
+
+    if not original_message_id.startswith("nomsgid:"):
+        message["In-Reply-To"] = original_message_id
+        message["References"] = f"{original_references} {original_message_id}".strip()
+
+    message.attach(MIMEText(templates.fde_followup_body(candidate_name), "plain"))
+
+    with open(pdf_path, "rb") as f:
+        attachment = MIMEApplication(f.read(), _subtype="pdf")
+    attachment.add_header("Content-Disposition", "attachment", filename=os.path.basename(pdf_path))
+    message.attach(attachment)
 
     with smtplib.SMTP_SSL(config.SMTP_HOST, config.SMTP_PORT) as smtp:
         smtp.login(send_address, send_app_password)

@@ -213,6 +213,22 @@ def fde_body(name):
     return _fde_style_body(name, "Forward Deployed Engineer")
 
 
+def fde_followup_body(name):
+    """One-off follow-up for candidates who already got the FDE assessment
+    email before its PDF existed - just the missing attachment, not the
+    whole assessment message again."""
+    return f"""Hi {name},
+
+Following up on the Forward Deployed Engineer technical assessment we sent earlier - please find the assessment document attached to this email.
+
+Everything else from our previous email (submission guidelines and deadline) still applies.
+
+If you have any questions, feel free to reply to this email.
+
+{config.SIGNATURE}
+"""
+
+
 def product_engineer_body(name):
     return _fde_style_body(name, "Product Engineer")
 

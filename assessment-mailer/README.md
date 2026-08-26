@@ -33,7 +33,7 @@ Roles handled:
 | Mobile Application Intern | move-to-next-stage + form message | none |
 | AI Native Digital Marketing & Growth Intern | Video assessment message | none (doc + form links) |
 | AI Native Sales & Business Development Intern | same video message | none (doc + form links) |
-| Forward Deployed Engineer | technical assessment message | none (task inline in the email) |
+| Forward Deployed Engineer | technical assessment message | Forward Deployed Engineer assessment PDF |
 | Product Engineer | same technical assessment message | Product Engineer assessment PDF |
 
 The AI Native roles only match on the full phrase — "AI Native"/"AI-Native"
@@ -174,6 +174,18 @@ python src/main.py
 **This actually sends real emails to real candidates** — there is no dry-run
 mode. Test with a throwaway application email to yourself before relying on
 the schedule.
+
+## One-off: FDE assessment PDF follow-up
+
+The first batch of Forward Deployed Engineer assessment emails went out
+before that role had a PDF attachment. `src/send_fde_followup.py` sends
+just that missing PDF, as a threaded follow-up reply, to a fixed list of
+candidates hardcoded at the top of the file. It's wired to its own
+**"Send FDE assessment PDF follow-up (one-off)"** GitHub Actions workflow
+(`workflow_dispatch` only, no schedule) — trigger it once from the Actions
+tab the same way as the main workflow. It's idempotent (tracks sent
+Message-IDs in a `FDEFollowUpsSent` sheet tab), so re-running it is safe if
+some candidates aren't found on the first pass (e.g. IMAP hiccup).
 
 ## Adjusting role keywords, the form URL, or the assessment PDFs
 
