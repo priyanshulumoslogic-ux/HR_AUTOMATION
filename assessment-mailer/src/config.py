@@ -93,6 +93,7 @@ QA_ASSESSMENT_PDF = os.path.join(ASSETS_DIR, "QA_Intern_Technical_Assessment.pdf
 FULLSTACK_ASSESSMENT_PDF = os.path.join(ASSETS_DIR, "FullStack_Intern_Technical_Assessment.pdf")
 GRAPHIC_ASSESSMENT_PDF = os.path.join(ASSETS_DIR, "Graphic_Designer_Assessment.pdf")
 RECRUITER_ASSESSMENT_PDF = os.path.join(ASSETS_DIR, "Recruiter_Intern_Assessment_Task.pdf")
+PRODUCT_ENGINEER_ASSESSMENT_PDF = os.path.join(ASSETS_DIR, "Product_Engineer_Assessment.pdf")
 
 # Prepended to the top of every assessment email so candidates see the
 # internship terms before the assessment itself.

@@ -19,7 +19,7 @@ _ROLE_TO_TEMPLATE = {
     role_classifier.AI_NATIVE: (templates.ai_native_body, None),
     role_classifier.MOBILE: (templates.mobile_body, None),
     role_classifier.FDE: (templates.fde_body, None),
-    role_classifier.PRODUCT_ENGINEER: (templates.product_engineer_body, None),
+    role_classifier.PRODUCT_ENGINEER: (templates.product_engineer_body, config.PRODUCT_ENGINEER_ASSESSMENT_PDF),
 }
 
 

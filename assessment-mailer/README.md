@@ -34,7 +34,7 @@ Roles handled:
 | AI Native Digital Marketing & Growth Intern | Video assessment message | none (doc + form links) |
 | AI Native Sales & Business Development Intern | same video message | none (doc + form links) |
 | Forward Deployed Engineer | technical assessment message | none (task inline in the email) |
-| Product Engineer | same technical assessment message | none (task inline in the email) |
+| Product Engineer | same technical assessment message | Product Engineer assessment PDF |
 
 The AI Native roles only match on the full phrase — "AI Native"/"AI-Native"
 *combined with* "Digital Marketing & Growth" or "Sales & Business
