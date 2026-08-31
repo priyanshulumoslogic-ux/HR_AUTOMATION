@@ -70,10 +70,12 @@ def _pick_resume_attachment(msg):
     return candidates[0]
 
 
-def fetch_candidate_emails(known_message_ids):
+def fetch_candidate_emails(known_message_ids, known_emails=frozenset()):
     """Connects over IMAP to every mailbox in config.MAILBOXES, searches each
     for application emails, and returns a combined list of dicts for
-    messages not already present in known_message_ids. Each dict:
+    messages not already present in known_message_ids AND not from an
+    address in known_emails (a candidate who already received an assessment
+    - see sheets_client.get_known_candidate_emails). Each dict:
     message_id, references, subject, display_name, from_email,
     resume_filename, resume_bytes, send_address, send_app_password.
     message_id/references are threaded back into the outgoing reply's
@@ -90,7 +92,7 @@ def fetch_candidate_emails(known_message_ids):
     for mailbox in config.MAILBOXES:
         print(f"-- scanning {mailbox['read_address']} --", flush=True)
         try:
-            results.extend(_fetch_from_mailbox(mailbox, known_message_ids))
+            results.extend(_fetch_from_mailbox(mailbox, known_message_ids, known_emails))
         except (imaplib.IMAP4.abort, imaplib.IMAP4.error, OSError, TimeoutError) as exc:
             # A dropped/stalled IMAP session (Gmail closing a long-lived
             # connection, a network blip) shouldn't take the other
@@ -101,7 +103,7 @@ def fetch_candidate_emails(known_message_ids):
     return results
 
 
-def _fetch_from_mailbox(mailbox, known_message_ids):
+def _fetch_from_mailbox(mailbox, known_message_ids, known_emails=frozenset()):
     imap = imaplib.IMAP4_SSL(config.IMAP_HOST, timeout=config.IMAP_TIMEOUT)
     try:
         imap.login(mailbox["read_address"], mailbox["read_app_password"])
@@ -117,6 +119,7 @@ def _fetch_from_mailbox(mailbox, known_message_ids):
         results = []
         skipped_no_resume = 0
         skipped_known = 0
+        skipped_known_sender = 0
         for fetch_i, num in enumerate(message_nums, start=1):
             if fetch_i == 1 or fetch_i % 25 == 0 or fetch_i == len(message_nums):
                 print(f"  fetching {fetch_i}/{len(message_nums)}...", flush=True)
@@ -125,13 +128,20 @@ def _fetch_from_mailbox(mailbox, known_message_ids):
             # on a past run. A full RFC822 fetch downloads the whole email
             # plus every attachment, so doing that just to throw the result
             # away wastes most of each run's time as the mailbox grows. Check
-            # the Message-ID with a cheap header-only fetch first and skip
-            # the full download when it's already known.
-            typ, hdr_data = imap.fetch(num, "(BODY.PEEK[HEADER.FIELDS (MESSAGE-ID)])")
+            # the Message-ID and From address with a cheap header-only fetch
+            # first and skip the full download when the message is already
+            # recorded, or when its sender has already had an assessment (a
+            # repeat application from someone we've already emailed).
+            typ, hdr_data = imap.fetch(num, "(BODY.PEEK[HEADER.FIELDS (MESSAGE-ID FROM)])")
             if typ == "OK" and hdr_data and hdr_data[0]:
-                probe_id = email.message_from_bytes(hdr_data[0][1]).get("Message-ID")
+                probe_msg = email.message_from_bytes(hdr_data[0][1])
+                probe_id = probe_msg.get("Message-ID")
                 if probe_id and probe_id.strip() in known_message_ids:
                     skipped_known += 1
+                    continue
+                _, probe_from = _from_for(probe_msg)
+                if probe_from and probe_from.strip().lower() in known_emails:
+                    skipped_known_sender += 1
                     continue
 
             typ, msg_data = imap.fetch(num, "(RFC822)")
@@ -145,12 +155,16 @@ def _fetch_from_mailbox(mailbox, known_message_ids):
             if message_id in known_message_ids:
                 continue
 
+            display_name, from_email = _from_for(msg)
+            if from_email and from_email.strip().lower() in known_emails:
+                skipped_known_sender += 1
+                continue
+
             resume_filename, resume_bytes = _pick_resume_attachment(msg)
             if not resume_filename:
                 skipped_no_resume += 1
                 continue
 
-            display_name, from_email = _from_for(msg)
             results.append({
                 "message_id": message_id,
                 "references": _references_for(msg),
@@ -165,6 +179,8 @@ def _fetch_from_mailbox(mailbox, known_message_ids):
 
         if skipped_known:
             print(f"Skipped {skipped_known} already-recorded email(s) via header-only check.", flush=True)
+        if skipped_known_sender:
+            print(f"Skipped {skipped_known_sender} email(s) from candidates already sent an assessment.", flush=True)
         if skipped_no_resume:
             print(f"Skipped {skipped_no_resume} subject-matching email(s) with no resume attachment.", flush=True)
 

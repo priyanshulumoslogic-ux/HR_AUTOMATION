@@ -71,9 +71,14 @@ def main():
 
     sent_worksheet = sheets_client.open_sent_worksheet(credentials)
     known_message_ids = sheets_client.get_known_message_ids(sent_worksheet)
-    print(f"Loaded {len(known_message_ids)} previously sent assessment(s).", flush=True)
+    known_emails = sheets_client.get_known_candidate_emails(sent_worksheet)
+    print(
+        f"Loaded {len(known_message_ids)} previously sent assessment(s) "
+        f"across {len(known_emails)} candidate address(es).",
+        flush=True,
+    )
 
-    candidates = gmail_reader.fetch_candidate_emails(known_message_ids)
+    candidates = gmail_reader.fetch_candidate_emails(known_message_ids, known_emails)
     print(f"Found {len(candidates)} new candidate email(s).", flush=True)
 
     seen_this_run = set()
@@ -84,6 +89,22 @@ def main():
         if message_id in seen_this_run:
             continue
         seen_this_run.add(message_id)
+
+        # One assessment per candidate, ever. A second application from an
+        # address we have already emailed - new thread, resent resume, same
+        # or different role title - is left for a human to handle instead of
+        # firing the task off again. known_emails is seeded from the sheet
+        # and also grows as this run sends, so two applications from the
+        # same person in one batch only trigger a single send.
+        candidate_email = sheets_client.normalize_email(candidate["from_email"])
+        if candidate_email in known_emails:
+            print(
+                f"  [{i}/{len(candidates)}] - {candidate['from_email']} | "
+                f"{candidate['subject']!r} | already sent an assessment to this "
+                f"address - skipped",
+                flush=True,
+            )
+            continue
 
         signal.signal(signal.SIGALRM, _timeout_handler)
         signal.alarm(PROCESS_TIMEOUT_SECONDS)
@@ -111,6 +132,7 @@ def main():
         # on to the next candidate - otherwise a crash mid-run could send
         # the same candidate a duplicate assessment on the next run.
         sheets_client.append_rows(sent_worksheet, [row])
+        known_emails.add(candidate_email)
         total_sent += 1
         print(f"  [{i}/{len(candidates)}] + sent {row[3]} assessment to {row[1]} ({row[2]})", flush=True)
 

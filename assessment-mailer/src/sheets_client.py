@@ -28,6 +28,23 @@ def get_known_message_ids(sent_worksheet):
     return set(column_values[1:])  # skip header row
 
 
+def normalize_email(address):
+    """Lower-cased, trimmed form used as the per-candidate dedup key. Gmail
+    treats the local part case-insensitively, and IMAP/header casing varies,
+    so "Foo@Gmail.com" and "foo@gmail.com" must collapse to one key."""
+    return (address or "").strip().lower()
+
+
+def get_known_candidate_emails(sent_worksheet):
+    """Every candidate email address that has already been sent an
+    assessment (column 2 of the AssessmentsSent sheet). Once an address is
+    in here it is never emailed another assessment again, even from a brand
+    new application email / thread for the same or a different role - a
+    person who already got a task is now a human-handled conversation."""
+    column_values = sent_worksheet.col_values(2)
+    return {normalize_email(v) for v in column_values[1:] if v.strip()}
+
+
 def append_rows(worksheet, rows):
     if not rows:
         return
